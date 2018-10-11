@@ -7,6 +7,7 @@ module ActiveRecordQueryTrace
     attr_accessor :enabled
     attr_accessor :level
     attr_accessor :lines
+    attr_accessor :filter
     attr_accessor :ignore_cached_queries
     attr_accessor :colorize
 
@@ -84,7 +85,7 @@ module ActiveRecordQueryTrace
           Rails.backtrace_cleaner.instance_variable_set :@root, Rails.root.to_s
         end
 
-        case ActiveRecordQueryTrace.level
+        unfiltered_trace = case ActiveRecordQueryTrace.level
         when :full
           trace
         when :rails
@@ -96,6 +97,8 @@ module ActiveRecordQueryTrace
         else
           raise "Invalid ActiveRecordQueryTrace.level value '#{ActiveRecordQueryTrace.level}' - should be :full, :rails, or :app"
         end
+
+        unfiltered_trace.select { |line| line =~ /#{ActiveRecordQueryTrace.filter}/ }
       end
 
       attach_to :active_record
