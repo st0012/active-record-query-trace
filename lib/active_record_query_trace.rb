@@ -42,6 +42,8 @@ module ActiveRecordQueryTrace
           index = begin
             if ActiveRecordQueryTrace.lines == 0
               0..-1
+            elsif ActiveRecordQueryTrace.lines.is_a? Range
+              ActiveRecordQueryTrace.lines
             else
               0..(ActiveRecordQueryTrace.lines - 1)
             end
@@ -51,7 +53,7 @@ module ActiveRecordQueryTrace
           return if payload[:name] == 'SCHEMA'
           return if ActiveRecordQueryTrace.ignore_cached_queries && payload[:name] == 'CACHE'
 
-          cleaned_trace = clean_trace(caller)[index].join("\n     from ")
+          cleaned_trace = (clean_trace(caller)[index] || []).join("\n     from ")
           debug("  Query Trace > " + colorize_text(cleaned_trace)) unless cleaned_trace.blank?
         end
       end
