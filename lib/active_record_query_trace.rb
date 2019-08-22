@@ -8,6 +8,7 @@ module ActiveRecordQueryTrace
     attr_accessor :level
     attr_accessor :lines
     attr_accessor :filter
+    attr_accessor :sql_filter
     attr_accessor :ignore_cached_queries
     attr_accessor :colorize
 
@@ -52,6 +53,7 @@ module ActiveRecordQueryTrace
           payload = event.payload
           return if payload[:name] == 'SCHEMA'
           return if ActiveRecordQueryTrace.ignore_cached_queries && payload[:name] == 'CACHE'
+          return unless payload[:sql] =~ /#{ActiveRecordQueryTrace.sql_filter}/
 
           cleaned_trace = (clean_trace(caller)[index] || []).join("\n     from ")
           debug("  Query Trace > " + colorize_text(cleaned_trace)) unless cleaned_trace.blank?
